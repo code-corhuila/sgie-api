@@ -30,7 +30,7 @@ public abstract class BaseService<T extends Auditoria> implements IBaseService<T
     public T findById(Long id) throws DataAccessException {
         Optional<T> op = getRepository().findById(id);
         if (op.isEmpty()) {
-            throw new IllegalStateException("Registro no encontrado");
+            throw new ResourceNotFoundException("Registro no encontrado");
         }
         return op.get();
     }
@@ -66,7 +66,7 @@ public abstract class BaseService<T extends Auditoria> implements IBaseService<T
         Optional<T> op = getRepository().findById(id);
 
         if (op.isEmpty()) {
-            throw new IllegalStateException("Registro no encontrado");
+            throw new ResourceNotFoundException("Registro no encontrado");
         } else if (op.get().getDeletedAt() != null) {
             throw new IllegalStateException("Registro inhabilitado");
         }
@@ -82,7 +82,7 @@ public abstract class BaseService<T extends Auditoria> implements IBaseService<T
     public void delete(Long id) throws DataAccessException {
         Optional<T> op = getRepository().findById(id);
         if (op.isEmpty()) {
-            throw new IllegalStateException("Registro no encontrado");
+            throw new ResourceNotFoundException("Registro no encontrado");
         }
 
         T entityUpdate = op.get();
@@ -96,7 +96,7 @@ public abstract class BaseService<T extends Auditoria> implements IBaseService<T
     public void cambiarEstado(Long id, Boolean estado) throws DataAccessException {
         Optional<T> optional = getRepository().findById(id);
         if (optional.isEmpty()) {
-            throw new IllegalStateException("Registro no encontrado para actualizar estado");
+            throw new ResourceNotFoundException("Registro no encontrado para actualizar estado");
         }
 
         T entity = optional.get();

@@ -38,6 +38,7 @@ public class Persona extends Auditoria {
     private Rol rol;
 
     @OneToOne(mappedBy = "persona", fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = true)
+    @JsonIgnore
     private Usuario usuario;
 
     @OneToMany(mappedBy = "persona", fetch = FetchType.LAZY)

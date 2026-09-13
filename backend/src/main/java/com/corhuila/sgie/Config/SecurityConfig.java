@@ -90,8 +90,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/v1/api/usuario/login",
                                 "/v1/api/usuario/me",
-                                "/api/*",  // ← AGREGADO: Permitir /api/* temporalmente
-                                "/actuator/**",  // ← AGREGADO: Para testing
+                                "/actuator/health",
+                                "/actuator/info",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/api/equipos/reportes/**",

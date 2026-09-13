@@ -23,6 +23,8 @@ public class Usuario extends Auditoria {
     @NotBlank(message = "El correo electronico es obligatorio")
     @Column(name = "email", unique = true, nullable = false)
     private String email;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @OneToOne(fetch = FetchType.EAGER, optional = false)

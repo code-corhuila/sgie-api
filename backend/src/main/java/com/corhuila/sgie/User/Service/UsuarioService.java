@@ -7,6 +7,7 @@ import com.corhuila.sgie.User.IRepository.IUsuarioRepository;
 import com.corhuila.sgie.User.IService.IUsuarioService;
 import com.corhuila.sgie.common.BaseService;
 import com.corhuila.sgie.common.IBaseRepository;
+import com.corhuila.sgie.common.ResourceNotFoundException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -61,7 +62,7 @@ public class UsuarioService extends BaseService<Usuario> implements IUsuarioServ
         Optional<Usuario> op = repository.findById(id);
 
         if (op.isEmpty()) {
-            throw new IllegalStateException("Usuario no encontrado");
+            throw new ResourceNotFoundException("Usuario no encontrado");
         } else if (op.get().getDeletedAt() != null) {
             throw new IllegalStateException("Usuario inhabilitado");
         }

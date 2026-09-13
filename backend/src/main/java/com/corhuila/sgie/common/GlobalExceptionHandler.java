@@ -46,6 +46,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ApiResponseDto<String>> handleResourceNotFound(ResourceNotFoundException ex) {
+        ApiResponseDto<String> body = new ApiResponseDto<>(ex.getMessage(), null, false);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponseDto<String>> handleIllegalArgument(IllegalArgumentException ex) {
+        ApiResponseDto<String> body = new ApiResponseDto<>(ex.getMessage(), null, false);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponseDto<String>> handleIllegalState(IllegalStateException ex) {
+        ApiResponseDto<String> body = new ApiResponseDto<>(ex.getMessage(), null, false);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponseDto<String>> handleGenericException(Exception ex) {
         ApiResponseDto<String> body = new ApiResponseDto<>(ex.getMessage(), null, false);
