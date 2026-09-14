@@ -43,4 +43,15 @@ public class HelperUtils {
         }
         return value.trim();
     }
+
+    public static String sanitizeFormulaInjection(String value) {
+        if (value == null || value.isEmpty()) {
+            return value;
+        }
+        char first = value.charAt(0);
+        if (first == '=' || first == '+' || first == '-' || first == '@') {
+            return "'" + value;
+        }
+        return value;
+    }
 }

@@ -26,17 +26,6 @@ public class CsvReportWriter implements ReportWriter {
         return escaped;
     }
 
-    private static String sanitize(String value) {
-        if (value == null || value.isEmpty()) {
-            return "";
-        }
-        char first = value.charAt(0);
-        if (first == '=' || first == '+' || first == '-' || first == '@') {
-            return "'" + value;
-        }
-        return value;
-    }
-
     @Override
     public String contentType() {
         return "text/csv; charset=UTF-8";
@@ -64,7 +53,7 @@ public class CsvReportWriter implements ReportWriter {
                     List<Object> values = BeanRowExtractor.values(bean);
                     List<String> serialized = values.stream()
                             .map(value -> value == null ? "" : String.valueOf(value))
-                            .map(CsvReportWriter::sanitize)
+                            .map(HelperUtils::sanitizeFormulaInjection)
                             .map(CsvReportWriter::escape)
                             .toList();
                     writeLine(out, serialized);

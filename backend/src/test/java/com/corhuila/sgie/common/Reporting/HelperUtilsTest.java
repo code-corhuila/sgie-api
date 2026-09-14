@@ -36,4 +36,19 @@ class HelperUtilsTest {
         assertThat(HelperUtils.normalize(" texto ")).isEqualTo("texto");
         assertThat(HelperUtils.normalize("   ")).isNull();
     }
+
+    @Test
+    void sanitizeFormulaInjectionEscapaCaracteresPeligrosos() {
+        assertThat(HelperUtils.sanitizeFormulaInjection("=cmd|'/c calc'!A1")).startsWith("'=");
+        assertThat(HelperUtils.sanitizeFormulaInjection("+1+1")).startsWith("'+");
+        assertThat(HelperUtils.sanitizeFormulaInjection("-1+1")).startsWith("'-");
+        assertThat(HelperUtils.sanitizeFormulaInjection("@SUM(1,1)")).startsWith("'@");
+    }
+
+    @Test
+    void sanitizeFormulaInjectionNoAlteraValoresNormales() {
+        assertThat(HelperUtils.sanitizeFormulaInjection("Laboratorio 101")).isEqualTo("Laboratorio 101");
+        assertThat(HelperUtils.sanitizeFormulaInjection("")).isEqualTo("");
+        assertThat(HelperUtils.sanitizeFormulaInjection(null)).isNull();
+    }
 }

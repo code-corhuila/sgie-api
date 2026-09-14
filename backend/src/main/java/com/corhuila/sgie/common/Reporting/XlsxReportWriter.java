@@ -187,7 +187,7 @@ public class XlsxReportWriter implements ReportWriter {
     }
 
     private void setCellAsText(Workbook workbook, Cell cell, Object value, boolean wrap, Map<String, CellStyle> styleCache) {
-        cell.setCellValue(String.valueOf(value));
+        cell.setCellValue(HelperUtils.sanitizeFormulaInjection(String.valueOf(value)));
         if (wrap) {
             cell.setCellStyle(textStyle(workbook, styleCache, true));
         }
