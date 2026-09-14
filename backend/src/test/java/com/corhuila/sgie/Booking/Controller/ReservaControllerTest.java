@@ -5,6 +5,7 @@ import com.corhuila.sgie.Booking.DTO.IReservaGeneralDTO;
 import com.corhuila.sgie.Booking.DTO.ReservaGeneralReporteDTO;
 import com.corhuila.sgie.Booking.IService.IReservaService;
 import com.corhuila.sgie.Booking.Service.ReservaService;
+import com.corhuila.sgie.User.Service.AuthenticatedPersonaResolver;
 import com.corhuila.sgie.common.Reporting.GeneradorReporteUtil;
 import com.corhuila.sgie.common.Reporting.ReportFormat;
 import com.corhuila.sgie.common.Reporting.ReporteGenericoService;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.ByteArrayOutputStream;
@@ -37,12 +39,14 @@ class ReservaControllerTest {
     private ReporteGenericoService reporteGenericoService;
     @Mock
     private ReservaService reservaService;
+    @Mock
+    private AuthenticatedPersonaResolver authenticatedPersonaResolver;
 
     private ReservaController controller;
 
     @BeforeEach
     void setup() {
-        controller = new ReservaController(reservaServiceFacade, reporteGenericoService, reservaService);
+        controller = new ReservaController(reservaServiceFacade, reporteGenericoService, reservaService, authenticatedPersonaResolver);
     }
 
     @Test
@@ -69,18 +73,22 @@ class ReservaControllerTest {
 
     @Test
     void findReservasYMantenimientosDevuelveRespuesta() {
+        Authentication authentication = mock(Authentication.class);
         IReservaGeneralDTO dto = mock(IReservaGeneralDTO.class);
+        when(authenticatedPersonaResolver.resolverNumeroIdentificacionPermitido(authentication, "123")).thenReturn("123");
         when(reservaServiceFacade.findReservasYMantenimientosByNumeroIdentificacion("123"))
                 .thenReturn(List.of(dto));
 
-        ResponseEntity<List<IReservaGeneralDTO>> response = controller.findReservasYMantenimientosByNumeroIdentificacion("123");
+        ResponseEntity<List<IReservaGeneralDTO>> response = controller.findReservasYMantenimientosByNumeroIdentificacion("123", authentication);
 
         assertThat(response.getBody()).containsExactly(dto);
     }
 
     @Test
     void exportarReservasMemoriaConstruyeReporte() throws Exception {
+        Authentication authentication = mock(Authentication.class);
         ReservaGeneralReporteDTO dto = sampleReporte();
+        when(authenticatedPersonaResolver.resolverNumeroIdentificacionPermitido(authentication, "123")).thenReturn("123");
         when(reservaService.obtenerDatosEnMemoria("123")).thenReturn(List.of(dto));
 
         GeneradorReporteUtil.GeneratedReport report = new GeneradorReporteUtil.GeneratedReport(
@@ -90,7 +98,7 @@ class ReservaControllerTest {
         when(reporteGenericoService.generar(eq(ReportFormat.CSV), anyList(), eq(ReservaGeneralReporteDTO.class), anyString(), anyString()))
                 .thenReturn(report);
 
-        ResponseEntity<StreamingResponseBody> response = controller.exportarReservas("csv", "memoria", "123");
+        ResponseEntity<StreamingResponseBody> response = controller.exportarReservas("csv", "memoria", "123", authentication);
 
         assertThat(response.getHeaders().getContentDisposition().getFilename()).isEqualTo("reporte_reservas.csv");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -100,7 +108,9 @@ class ReservaControllerTest {
 
     @Test
     void exportarReservasStreamingDelegatesToReporteGenerico() {
+        Authentication authentication = mock(Authentication.class);
         ReservaGeneralReporteDTO dto = sampleReporte();
+        when(authenticatedPersonaResolver.resolverNumeroIdentificacionPermitido(authentication, null)).thenReturn(null);
         when(reservaService.proveedorStream(null)).thenReturn(() -> Stream.of(dto));
 
         ResponseEntity<StreamingResponseBody> streaming = ResponseEntity.ok(outputStream -> {
@@ -108,7 +118,7 @@ class ReservaControllerTest {
         when(reporteGenericoService.generarStreaming(eq(ReportFormat.PDF), any(), eq(ReservaGeneralReporteDTO.class), anyString(), anyString()))
                 .thenReturn(streaming);
 
-        ResponseEntity<StreamingResponseBody> response = controller.exportarReservas("pdf", "stream", null);
+        ResponseEntity<StreamingResponseBody> response = controller.exportarReservas("pdf", "stream", null, authentication);
         assertThat(response).isSameAs(streaming);
     }
 

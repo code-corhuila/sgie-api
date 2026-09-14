@@ -3,6 +3,7 @@ package com.corhuila.sgie.Maintenance.Controller;
 import com.corhuila.sgie.Maintenance.DTO.*;
 import com.corhuila.sgie.Maintenance.Entity.MantenimientoEquipo;
 import com.corhuila.sgie.Maintenance.Service.MantenimientoEquipoService;
+import com.corhuila.sgie.User.Service.AuthenticatedPersonaResolver;
 import com.corhuila.sgie.common.EstadoDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,12 +26,14 @@ class MantenimientoEquipoControllerTest {
 
     @Mock
     private MantenimientoEquipoService service;
+    @Mock
+    private AuthenticatedPersonaResolver authenticatedPersonaResolver;
 
     private MantenimientoEquipoController controller;
 
     @BeforeEach
     void setup() {
-        controller = new MantenimientoEquipoController(service, service);
+        controller = new MantenimientoEquipoController(service, service, authenticatedPersonaResolver);
     }
 
     @Test
@@ -61,11 +65,13 @@ class MantenimientoEquipoControllerTest {
 
     @Test
     void findMantenimientosEquipoDelegatesToService() {
+        Authentication authentication = mock(Authentication.class);
         IMantenimientoEquipoDTO dto = mock(IMantenimientoEquipoDTO.class);
+        when(authenticatedPersonaResolver.resolverNumeroIdentificacionPermitido(authentication, "123")).thenReturn("123");
         when(service.findMantenimientosEquipoByNumeroIdentificacion("123"))
                 .thenReturn(List.of(dto));
 
-        ResponseEntity<List<IMantenimientoEquipoDTO>> response = controller.findMantenimientosEquipoByNumeroIdentificacion("123");
+        ResponseEntity<List<IMantenimientoEquipoDTO>> response = controller.findMantenimientosEquipoByNumeroIdentificacion("123", authentication);
         assertThat(response.getBody()).containsExactly(dto);
     }
 

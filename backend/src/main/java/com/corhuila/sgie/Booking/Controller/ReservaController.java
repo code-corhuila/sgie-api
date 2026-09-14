@@ -7,6 +7,7 @@ import com.corhuila.sgie.Booking.Entity.Reserva;
 import com.corhuila.sgie.Booking.IService.IReservaService;
 import com.corhuila.sgie.Booking.Service.ReservaService;
 import com.corhuila.sgie.common.BaseController;
+import com.corhuila.sgie.User.Service.AuthenticatedPersonaResolver;
 import com.corhuila.sgie.common.Reporting.GeneradorReporteUtil;
 import com.corhuila.sgie.common.Reporting.ReportFormat;
 import com.corhuila.sgie.common.Reporting.ReporteGenericoService;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -27,18 +29,20 @@ import java.util.stream.Stream;
 import static com.corhuila.sgie.common.Reporting.HelperUtils.buildHeaders;
 import static com.corhuila.sgie.common.Reporting.HelperUtils.isStreaming;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("v1/api/reserva")
 public class ReservaController extends BaseController<Reserva, IReservaService> {
 
     private final ReporteGenericoService reporteGenericoService;
     private final ReservaService reservaService;
+    private final AuthenticatedPersonaResolver authenticatedPersonaResolver;
 
-    public ReservaController(IReservaService service, ReporteGenericoService reporteGenericoService, ReservaService reservaService) {
+    public ReservaController(IReservaService service, ReporteGenericoService reporteGenericoService,
+                             ReservaService reservaService, AuthenticatedPersonaResolver authenticatedPersonaResolver) {
         super(service, "RESERVA");
         this.reporteGenericoService = reporteGenericoService;
         this.reservaService = reservaService;
+        this.authenticatedPersonaResolver = authenticatedPersonaResolver;
     }
 
     @GetMapping("/horas-disponibles-instalacion")
@@ -65,20 +69,24 @@ public class ReservaController extends BaseController<Reserva, IReservaService> 
 
     @GetMapping("/reservas-mantenimientos")
     @PreAuthorize("@permissionEvaluator.hasPermission(authentication, this.entityName, 'CONSULTAR')")
-    public ResponseEntity<List<IReservaGeneralDTO>> findReservasYMantenimientosByNumeroIdentificacion(@RequestParam(required = false) String numeroIdentificacion) {
-        List<IReservaGeneralDTO> reservas = service.findReservasYMantenimientosByNumeroIdentificacion(numeroIdentificacion);
+    public ResponseEntity<List<IReservaGeneralDTO>> findReservasYMantenimientosByNumeroIdentificacion(
+            @RequestParam(required = false) String numeroIdentificacion, Authentication authentication) {
+        String idPermitido = authenticatedPersonaResolver.resolverNumeroIdentificacionPermitido(authentication, numeroIdentificacion);
+        List<IReservaGeneralDTO> reservas = service.findReservasYMantenimientosByNumeroIdentificacion(idPermitido);
         return ResponseEntity.ok(reservas);
     }
 
     @GetMapping(value = "/reporte/{formato}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @PreAuthorize("@permissionEvaluator.hasPermission(authentication, this.entityName, 'CONSULTAR')")
     @Transactional(readOnly = true)
-    public ResponseEntity<StreamingResponseBody> exportarReservas(@PathVariable("formato") String formato, @RequestParam(defaultValue = "stream") String modo, @RequestParam(required = false) String numeroIdentificacion) {
+    public ResponseEntity<StreamingResponseBody> exportarReservas(@PathVariable("formato") String formato, @RequestParam(defaultValue = "stream") String modo,
+            @RequestParam(required = false) String numeroIdentificacion, Authentication authentication) {
+        String idPermitido = authenticatedPersonaResolver.resolverNumeroIdentificacionPermitido(authentication, numeroIdentificacion);
         ReportFormat format = ReportFormat.fromName(formato);
-        Supplier<Stream<ReservaGeneralReporteDTO>> supplier = reservaService.proveedorStream(numeroIdentificacion);
+        Supplier<Stream<ReservaGeneralReporteDTO>> supplier = reservaService.proveedorStream(idPermitido);
 
         if (!isStreaming(modo)) {
-            List<ReservaGeneralReporteDTO> datos = reservaService.obtenerDatosEnMemoria(numeroIdentificacion);
+            List<ReservaGeneralReporteDTO> datos = reservaService.obtenerDatosEnMemoria(idPermitido);
             GeneradorReporteUtil.GeneratedReport reporte = reporteGenericoService.generar(
                     format,
                     datos,

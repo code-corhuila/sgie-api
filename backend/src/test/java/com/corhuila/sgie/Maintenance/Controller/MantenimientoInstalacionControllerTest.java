@@ -3,6 +3,7 @@ package com.corhuila.sgie.Maintenance.Controller;
 import com.corhuila.sgie.Maintenance.DTO.*;
 import com.corhuila.sgie.Maintenance.Entity.MantenimientoInstalacion;
 import com.corhuila.sgie.Maintenance.Service.MantenimientoInstalacionService;
+import com.corhuila.sgie.User.Service.AuthenticatedPersonaResolver;
 import com.corhuila.sgie.common.EstadoDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,12 +26,14 @@ class MantenimientoInstalacionControllerTest {
 
     @Mock
     private MantenimientoInstalacionService service;
+    @Mock
+    private AuthenticatedPersonaResolver authenticatedPersonaResolver;
 
     private MantenimientoInstalacionController controller;
 
     @BeforeEach
     void setup() {
-        controller = new MantenimientoInstalacionController(service, service);
+        controller = new MantenimientoInstalacionController(service, service, authenticatedPersonaResolver);
     }
 
     @Test
@@ -61,11 +65,13 @@ class MantenimientoInstalacionControllerTest {
 
     @Test
     void findMantenimientosInstalacionDelegates() {
+        Authentication authentication = mock(Authentication.class);
         IMantenimientoInstalacionDTO dto = mock(IMantenimientoInstalacionDTO.class);
+        when(authenticatedPersonaResolver.resolverNumeroIdentificacionPermitido(authentication, "123")).thenReturn("123");
         when(service.findMantenimientosInstalacionByNumeroIdentificacion("123"))
                 .thenReturn(List.of(dto));
 
-        ResponseEntity<List<IMantenimientoInstalacionDTO>> response = controller.findMantenimientosInstalacionByNumeroIdentificacion("123");
+        ResponseEntity<List<IMantenimientoInstalacionDTO>> response = controller.findMantenimientosInstalacionByNumeroIdentificacion("123", authentication);
         assertThat(response.getBody()).containsExactly(dto);
     }
 

@@ -3,12 +3,14 @@ package com.corhuila.sgie.Booking.Controller;
 import com.corhuila.sgie.Booking.DTO.*;
 import com.corhuila.sgie.Booking.IService.IDetalleReservaEquipoService;
 import com.corhuila.sgie.Booking.Service.DetalleReservaEquipoService;
+import com.corhuila.sgie.User.Service.AuthenticatedPersonaResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,12 +25,14 @@ class DetalleReservaEquipoControllerTest {
     private IDetalleReservaEquipoService detalleReservaEquipoServiceFacade;
     @Mock
     private DetalleReservaEquipoService detalleReservaEquipoService;
+    @Mock
+    private AuthenticatedPersonaResolver authenticatedPersonaResolver;
 
     private DetalleReservaEquipoController controller;
 
     @BeforeEach
     void setup() {
-        controller = new DetalleReservaEquipoController(detalleReservaEquipoServiceFacade, detalleReservaEquipoService);
+        controller = new DetalleReservaEquipoController(detalleReservaEquipoServiceFacade, detalleReservaEquipoService, authenticatedPersonaResolver);
     }
 
     @Test
@@ -58,11 +62,13 @@ class DetalleReservaEquipoControllerTest {
 
     @Test
     void findReservasEquipoByNumeroIdentificacionUsaFacade() {
+        Authentication authentication = mock(Authentication.class);
         IReservaEquipoDTO dto = mock(IReservaEquipoDTO.class);
+        when(authenticatedPersonaResolver.resolverNumeroIdentificacionPermitido(authentication, "123")).thenReturn("123");
         when(detalleReservaEquipoServiceFacade.findReservasEquipoByNumeroIdentificacion("123"))
                 .thenReturn(List.of(dto));
 
-        ResponseEntity<List<IReservaEquipoDTO>> response = controller.findReservasEquipoByNumeroIdentificacion("123");
+        ResponseEntity<List<IReservaEquipoDTO>> response = controller.findReservasEquipoByNumeroIdentificacion("123", authentication);
         assertThat(response.getBody()).containsExactly(dto);
     }
 }

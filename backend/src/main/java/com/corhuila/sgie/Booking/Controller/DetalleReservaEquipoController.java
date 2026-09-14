@@ -4,23 +4,27 @@ import com.corhuila.sgie.Booking.DTO.*;
 import com.corhuila.sgie.Booking.Entity.DetalleReservaEquipo;
 import com.corhuila.sgie.Booking.IService.IDetalleReservaEquipoService;
 import com.corhuila.sgie.Booking.Service.DetalleReservaEquipoService;
+import com.corhuila.sgie.User.Service.AuthenticatedPersonaResolver;
 import com.corhuila.sgie.common.BaseController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("v1/api/detalle-reserva-equipo")
 public class DetalleReservaEquipoController extends BaseController<DetalleReservaEquipo, IDetalleReservaEquipoService> {
 
     private final DetalleReservaEquipoService detalleReservaEquipoService;
+    private final AuthenticatedPersonaResolver authenticatedPersonaResolver;
 
-    public DetalleReservaEquipoController(IDetalleReservaEquipoService service, DetalleReservaEquipoService detalleReservaEquipoService) {
+    public DetalleReservaEquipoController(IDetalleReservaEquipoService service, DetalleReservaEquipoService detalleReservaEquipoService,
+                                          AuthenticatedPersonaResolver authenticatedPersonaResolver) {
         super(service, "DETALLE_RESERVA_EQUIPO");
         this.detalleReservaEquipoService = detalleReservaEquipoService;
+        this.authenticatedPersonaResolver = authenticatedPersonaResolver;
     }
 
     @PutMapping("/{idDetalle}/cerrar-detalle-reserva-equipo")
@@ -49,8 +53,10 @@ public class DetalleReservaEquipoController extends BaseController<DetalleReserv
 
     @GetMapping("/reservas-equipos")
     @PreAuthorize("@permissionEvaluator.hasPermission(authentication, this.entityName, 'CONSULTAR')")
-    public ResponseEntity<List<IReservaEquipoDTO>> findReservasEquipoByNumeroIdentificacion(@RequestParam String numeroIdentificacion) {
-        List<IReservaEquipoDTO> reservasEquipos = service.findReservasEquipoByNumeroIdentificacion(numeroIdentificacion);
+    public ResponseEntity<List<IReservaEquipoDTO>> findReservasEquipoByNumeroIdentificacion(
+            @RequestParam String numeroIdentificacion, Authentication authentication) {
+        String idPermitido = authenticatedPersonaResolver.resolverNumeroIdentificacionPermitido(authentication, numeroIdentificacion);
+        List<IReservaEquipoDTO> reservasEquipos = service.findReservasEquipoByNumeroIdentificacion(idPermitido);
         return ResponseEntity.ok(reservasEquipos);
     }
 }

@@ -3,12 +3,14 @@ package com.corhuila.sgie.Booking.Controller;
 import com.corhuila.sgie.Booking.DTO.*;
 import com.corhuila.sgie.Booking.IService.IDetalleReservaInstalacionService;
 import com.corhuila.sgie.Booking.Service.DetalleReservaInstalacionService;
+import com.corhuila.sgie.User.Service.AuthenticatedPersonaResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,12 +25,14 @@ class DetalleReservaInstalacionControllerTest {
     private IDetalleReservaInstalacionService detalleReservaInstalacionServiceFacade;
     @Mock
     private DetalleReservaInstalacionService detalleReservaInstalacionService;
+    @Mock
+    private AuthenticatedPersonaResolver authenticatedPersonaResolver;
 
     private DetalleReservaInstalacionController controller;
 
     @BeforeEach
     void setup() {
-        controller = new DetalleReservaInstalacionController(detalleReservaInstalacionServiceFacade, detalleReservaInstalacionService);
+        controller = new DetalleReservaInstalacionController(detalleReservaInstalacionServiceFacade, detalleReservaInstalacionService, authenticatedPersonaResolver);
     }
 
     @Test
@@ -59,11 +63,13 @@ class DetalleReservaInstalacionControllerTest {
 
     @Test
     void findReservaInstalacionDelegatesToFacade() {
+        Authentication authentication = mock(Authentication.class);
         IReservaInstalacionDTO dto = mock(IReservaInstalacionDTO.class);
+        when(authenticatedPersonaResolver.resolverNumeroIdentificacionPermitido(authentication, "123")).thenReturn("123");
         when(detalleReservaInstalacionServiceFacade.findReservaInstalacionByNumeroIdentificacion("123"))
                 .thenReturn(List.of(dto));
 
-        ResponseEntity<List<IReservaInstalacionDTO>> response = controller.findReservaInstalacionByNumeroIdentificacion("123");
+        ResponseEntity<List<IReservaInstalacionDTO>> response = controller.findReservaInstalacionByNumeroIdentificacion("123", authentication);
         assertThat(response.getBody()).containsExactly(dto);
     }
 }

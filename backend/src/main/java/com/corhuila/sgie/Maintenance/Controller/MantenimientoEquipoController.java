@@ -3,23 +3,27 @@ package com.corhuila.sgie.Maintenance.Controller;
 import com.corhuila.sgie.Maintenance.DTO.*;
 import com.corhuila.sgie.Maintenance.Entity.MantenimientoEquipo;
 import com.corhuila.sgie.Maintenance.Service.MantenimientoEquipoService;
+import com.corhuila.sgie.User.Service.AuthenticatedPersonaResolver;
 import com.corhuila.sgie.common.BaseController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("v1/api/mantenimiento-equipo")
 public class MantenimientoEquipoController extends BaseController<MantenimientoEquipo, MantenimientoEquipoService> {
 
     private final MantenimientoEquipoService mantenimientoEquipoService;
+    private final AuthenticatedPersonaResolver authenticatedPersonaResolver;
 
-    public MantenimientoEquipoController(MantenimientoEquipoService service, MantenimientoEquipoService mantenimientoEquipoService) {
+    public MantenimientoEquipoController(MantenimientoEquipoService service, MantenimientoEquipoService mantenimientoEquipoService,
+                                         AuthenticatedPersonaResolver authenticatedPersonaResolver) {
         super(service, "MANTENIMIENTO_EQUIPO");
         this.mantenimientoEquipoService = mantenimientoEquipoService;
+        this.authenticatedPersonaResolver = authenticatedPersonaResolver;
     }
 
     @PutMapping("/{idDetalle}/cerrar-mantenimiento-equipo")
@@ -46,8 +50,10 @@ public class MantenimientoEquipoController extends BaseController<MantenimientoE
 
     @GetMapping("/mantenimientos-equipos")
     @PreAuthorize("@permissionEvaluator.hasPermission(authentication, this.entityName, 'CONSULTAR')")
-    public ResponseEntity<List<IMantenimientoEquipoDTO>> findMantenimientosEquipoByNumeroIdentificacion(@RequestParam String numeroIdentificacion) {
-        List<IMantenimientoEquipoDTO> mantenimientosEquipos = service.findMantenimientosEquipoByNumeroIdentificacion(numeroIdentificacion);
+    public ResponseEntity<List<IMantenimientoEquipoDTO>> findMantenimientosEquipoByNumeroIdentificacion(
+            @RequestParam String numeroIdentificacion, Authentication authentication) {
+        String idPermitido = authenticatedPersonaResolver.resolverNumeroIdentificacionPermitido(authentication, numeroIdentificacion);
+        List<IMantenimientoEquipoDTO> mantenimientosEquipos = service.findMantenimientosEquipoByNumeroIdentificacion(idPermitido);
         return ResponseEntity.ok(mantenimientosEquipos);
     }
 
