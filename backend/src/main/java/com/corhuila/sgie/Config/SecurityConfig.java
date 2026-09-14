@@ -3,6 +3,7 @@ package com.corhuila.sgie.Config;
 import com.corhuila.sgie.Security.CsrfCookieFilter;
 import com.corhuila.sgie.Security.CustomUserDetailsService;
 import com.corhuila.sgie.Security.JwtFilter;
+import com.corhuila.sgie.Security.LoginRateLimitFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -43,17 +44,19 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtFilter jwtFilter;
+    private final LoginRateLimitFilter loginRateLimitFilter;
     private final JwtCookieProperties jwtCookieProperties;
 
-    // ← CAMBIO: Agregar localhost:3000
     @Value("${spring.web.cors.allowed-origins:http://localhost:3000,http://localhost:5173}")
     private String allowedOrigins;
 
     public SecurityConfig(CustomUserDetailsService customUserDetailsService,
                           JwtFilter jwtFilter,
+                          LoginRateLimitFilter loginRateLimitFilter,
                           JwtCookieProperties jwtCookieProperties) {
         this.customUserDetailsService = customUserDetailsService;
         this.jwtFilter = jwtFilter;
+        this.loginRateLimitFilter = loginRateLimitFilter;
         this.jwtCookieProperties = jwtCookieProperties;
     }
 
@@ -101,8 +104,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(loginRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                // ← CAMBIO: Comentar el filtro CSRF
                 .addFilterAfter(new CsrfCookieFilter(jwtCookieProperties, CSRF_HEADER_NAME), CsrfFilter.class)
                 .build();
     }
