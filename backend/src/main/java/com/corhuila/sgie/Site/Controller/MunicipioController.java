@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("v1/api/municipio")
 public class MunicipioController extends BaseController<Municipio, IMunicipioService> {

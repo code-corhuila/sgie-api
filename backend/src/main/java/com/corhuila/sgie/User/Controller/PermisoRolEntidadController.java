@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("v1/api/permiso-rol-entidad")
 public class PermisoRolEntidadController extends BaseController<PermisoRolEntidad, IPermisoRolEntidadService> {

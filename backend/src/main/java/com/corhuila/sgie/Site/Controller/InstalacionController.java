@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 import static com.corhuila.sgie.common.Reporting.HelperUtils.buildHeaders;
 import static com.corhuila.sgie.common.Reporting.HelperUtils.isStreaming;
 
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("v1/api/instalacion")
 public class InstalacionController extends BaseController<Instalacion, IInstalacionService> {
