@@ -56,8 +56,39 @@ class BaseServiceTest {
     void findByIdLanzaExceptionCuandoNoExiste() {
         when(repository.findById(2L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.findById(2L))
-                .isInstanceOf(Exception.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Registro no encontrado");
+    }
+
+    @Test
+    void updateLanzaResourceNotFoundCuandoNoExiste() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.update(99L, new DummyEntity()))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void updateLanzaIllegalStateCuandoRegistroInhabilitado() {
+        entity.setDeletedAt(LocalDateTime.now());
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+
+        assertThatThrownBy(() -> service.update(1L, new DummyEntity()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("inhabilitado");
+    }
+
+    @Test
+    void deleteLanzaResourceNotFoundCuandoNoExiste() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.delete(99L))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void cambiarEstadoLanzaResourceNotFoundCuandoNoExiste() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.cambiarEstado(99L, true))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
