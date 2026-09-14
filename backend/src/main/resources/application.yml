@@ -39,6 +39,10 @@ security:
       secure: ${JWT_COOKIE_SECURE:false}
       same-site: ${JWT_COOKIE_SAMESITE:None}
       max-age-seconds: ${JWT_COOKIE_MAX_AGE:3600}
+  login:
+    rate-limit:
+      capacity: ${LOGIN_RATE_LIMIT_CAPACITY:5}
+      window-minutes: ${LOGIN_RATE_LIMIT_WINDOW_MINUTES:1}
 
 logging:
   level:
