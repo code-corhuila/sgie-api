@@ -11,12 +11,12 @@ services:
       JAVA_OPTS: "-Xms512m -Xmx1024m"
       SPRING_DATASOURCE_URL: jdbc:postgresql://DataBase-dev:5432/sgie_db
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: admin123
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Debes definir DB_PASSWORD en backend/.env}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: true
       SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
-      JWT_SECRET: gtMPOQ/bGRvlpHopuEqiTY2YZG79UQmru11hIJbtFiPJD+C3WCXYhlEeFKCG2g9A
+      JWT_SECRET: ${JWT_SECRET:?Debes definir JWT_SECRET en backend/.env}
       JWT_EXPIRATION_MS: 3600000
       JWT_COOKIE_NAME: token
       JWT_COOKIE_SECURE: false
@@ -26,12 +26,12 @@ services:
       SESSION_COOKIE_SAMESITE: Lax
       MAIL_HOST: smtp.gmail.com
       MAIL_PORT: 587
-      MAIL_USERNAME: jszambrano@corhuila.edu.co
-      MAIL_PASSWORD: tetfudsasxugzrxu
+      MAIL_USERNAME: ${MAIL_USERNAME:?Debes definir MAIL_USERNAME en backend/.env}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:?Debes definir MAIL_PASSWORD en backend/.env}
     networks:
-      - db_sgie-network  # ← CAMBIO: usa la red de la DB
+      - db_sgie-network
     restart: unless-stopped
 
 networks:
-  db_sgie-network:  # ← CAMBIO: usa la red de la DB
-    external: true  # ← IMPORTANTE: marca como externa
+  db_sgie-network:
+    external: true
