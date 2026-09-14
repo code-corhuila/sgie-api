@@ -131,7 +131,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.7.1</version> <!-- usa la versión más reciente estable -->
+            <version>42.7.13</version>
         </dependency>
 
         <dependency>
@@ -142,7 +142,7 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.2.5</version>
+            <version>5.5.1</version>
         </dependency>
 
         <dependency>
@@ -252,6 +252,22 @@
                                     <element>PACKAGE</element>
                                     <includes>
                                         <include>com.corhuila.sgie.Site.*</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <includes>
+                                        <include>com.corhuila.sgie.Security.*</include>
+                                        <include>com.corhuila.sgie.common</include>
+                                        <include>com.corhuila.sgie.User.Service*</include>
+                                        <include>com.corhuila.sgie.User.Controller*</include>
                                     </includes>
                                     <limits>
                                         <limit>
