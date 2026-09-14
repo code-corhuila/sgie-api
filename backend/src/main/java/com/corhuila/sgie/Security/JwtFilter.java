@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -118,8 +119,8 @@ public class JwtFilter extends OncePerRequestFilter {
             if (jwtUtil.validateToken(token, userDetails)) {
                 establecerAutenticacion(token, userDetails);
             }
-        } catch (JwtException | IllegalArgumentException ex) {
-            log.debug("Token JWT inválido o expirado: {}", ex.getMessage());
+        } catch (JwtException | IllegalArgumentException | UsernameNotFoundException ex) {
+            log.debug("Token JWT inválido o usuario no disponible: {}", ex.getMessage());
         }
     }
 

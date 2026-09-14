@@ -5,9 +5,9 @@ import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -54,7 +54,8 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleAuthenticationExceptionsDevuelve401() {
         ResponseEntity<ApiResponseDto<String>> response =
-                handler.handleAuthenticationExceptions(new BadCredentialsException("Credenciales inválidas"));
+                handler.handleAuthenticationExceptions(new BadCredentialsException("Credenciales inválidas"),
+                        new MockHttpServletRequest("POST", "/v1/api/usuario/login"));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getBody().getMessage()).contains("Credenciales");
@@ -63,9 +64,35 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleAccessDeniedDevuelve403() {
         ResponseEntity<ApiResponseDto<String>> response =
-                handler.handleAccessDenied(new AccessDeniedException("Sin permisos"));
+                handler.handleAccessDenied(new AccessDeniedException("Sin permisos"),
+                        new MockHttpServletRequest("GET", "/v1/api/reserva"));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void handleResourceNotFoundDevuelve404() {
+        ResponseEntity<ApiResponseDto<String>> response =
+                handler.handleResourceNotFound(new ResourceNotFoundException("Registro no encontrado"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody().getMessage()).isEqualTo("Registro no encontrado");
+    }
+
+    @Test
+    void handleIllegalArgumentDevuelve400() {
+        ResponseEntity<ApiResponseDto<String>> response =
+                handler.handleIllegalArgument(new IllegalArgumentException("Fecha y horas son obligatorias."));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void handleIllegalStateDevuelve409() {
+        ResponseEntity<ApiResponseDto<String>> response =
+                handler.handleIllegalState(new IllegalStateException("La reserva se solapa con otra existente"));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test

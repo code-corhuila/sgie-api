@@ -47,6 +47,7 @@ class CustomUserDetailsServiceTest {
         usuario.setId(1L);
         usuario.setEmail("demo@mail.com");
         usuario.setPassword("hash");
+        usuario.setState(true);
         usuario.setPersona(persona);
         persona.setUsuario(usuario);
     }
@@ -87,5 +88,26 @@ class CustomUserDetailsServiceTest {
 
         assertThatThrownBy(() -> service.loadUserByUsername("demo@mail.com"))
                 .isInstanceOf(UsernameNotFoundException.class);
+    }
+
+    @Test
+    void loadUserByUsernameMarcaDeshabilitadoCuandoElUsuarioEstaInactivo() {
+        usuario.setState(false);
+        when(usuarioRepository.findByEmail("demo@mail.com")).thenReturn(Optional.of(usuario));
+        when(permisoRolEntidadRepository.findByRolIdAndStateTrue(anyLong())).thenReturn(List.of());
+
+        var userDetails = service.loadUserByUsername("demo@mail.com");
+
+        assertThat(userDetails.isEnabled()).isFalse();
+    }
+
+    @Test
+    void loadUserByUsernameMantieneHabilitadoCuandoElUsuarioEstaActivo() {
+        when(usuarioRepository.findByEmail("demo@mail.com")).thenReturn(Optional.of(usuario));
+        when(permisoRolEntidadRepository.findByRolIdAndStateTrue(anyLong())).thenReturn(List.of());
+
+        var userDetails = service.loadUserByUsername("demo@mail.com");
+
+        assertThat(userDetails.isEnabled()).isTrue();
     }
 }

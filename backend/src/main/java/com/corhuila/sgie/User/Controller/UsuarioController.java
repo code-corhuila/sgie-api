@@ -17,11 +17,12 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,18 +39,18 @@ public class UsuarioController {
     private static final String ROLE_PREFIX = "ROLE_";
 
     private final IUsuarioService usuarioService;
-    private final UserDetailsService userDetailsService;
+    private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final IUsuarioRepository usuarioRepository;
     private final JwtCookieProperties jwtCookieProperties;
 
     public UsuarioController(IUsuarioService usuarioService,
-                             UserDetailsService userDetailsService,
+                             AuthenticationManager authenticationManager,
                              JwtUtil jwtUtil,
                              IUsuarioRepository usuarioRepository,
                              JwtCookieProperties jwtCookieProperties) {
         this.usuarioService = usuarioService;
-        this.userDetailsService = userDetailsService;
+        this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.usuarioRepository = usuarioRepository;
         this.jwtCookieProperties = jwtCookieProperties;
@@ -107,7 +108,9 @@ public class UsuarioController {
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest req, HttpServletResponse response) {
 
-        UserDetails ud = userDetailsService.loadUserByUsername(req.getEmail());
+        Authentication authResult = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword()));
+        UserDetails ud = (UserDetails) authResult.getPrincipal();
 
         Usuario usuario = usuarioRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));

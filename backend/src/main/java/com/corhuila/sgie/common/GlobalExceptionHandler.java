@@ -1,11 +1,13 @@
 package com.corhuila.sgie.common;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -15,6 +17,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger securityLog = LoggerFactory.getLogger("SecurityEvents");
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponseDto<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -34,14 +38,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
-    @ExceptionHandler({BadCredentialsException.class, UsernameNotFoundException.class})
-    public ResponseEntity<ApiResponseDto<String>> handleAuthenticationExceptions(RuntimeException ex) {
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponseDto<String>> handleAuthenticationExceptions(AuthenticationException ex, HttpServletRequest request) {
+        securityLog.warn("Autenticación rechazada en {} {}: {}", request.getMethod(), request.getRequestURI(), ex.getMessage());
         ApiResponseDto<String> body = new ApiResponseDto<>(ex.getMessage(), null, false);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiResponseDto<String>> handleAccessDenied(AccessDeniedException ex) {
+    public ResponseEntity<ApiResponseDto<String>> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        securityLog.warn("Acceso denegado en {} {}", request.getMethod(), request.getRequestURI());
         ApiResponseDto<String> body = new ApiResponseDto<>("Acceso denegado", null, false);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }

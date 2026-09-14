@@ -96,4 +96,20 @@ class JwtFilterTest {
 
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
+
+    @Test
+    void noLanzaExcepcionCuandoTokenExpiradoOMalformado() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/v1/api/usuario");
+        request.setCookies(new jakarta.servlet.http.Cookie("token", "expirado"));
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        FilterChain chain = mock(FilterChain.class);
+
+        when(jwtUtil.extractUsername("expirado")).thenThrow(new io.jsonwebtoken.ExpiredJwtException(null, null, "token expirado"));
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain).doFilter(request, response);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        assertThat(response.getStatus()).isEqualTo(200);
+    }
 }

@@ -22,11 +22,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.LocalDateTime;
@@ -45,7 +46,7 @@ class UsuarioControllerTest {
     @Mock
     private IUsuarioService usuarioService;
     @Mock
-    private UserDetailsService userDetailsService;
+    private AuthenticationManager authenticationManager;
     @Mock
     private JwtUtil jwtUtil;
     @Mock
@@ -64,7 +65,7 @@ class UsuarioControllerTest {
     void setup() {
         cookieProperties = new JwtCookieProperties();
         cookieProperties.setName("token");
-        controller = new UsuarioController(usuarioService, userDetailsService,
+        controller = new UsuarioController(usuarioService, authenticationManager,
                 jwtUtil, usuarioRepository, cookieProperties);
 
         Rol rol = new Rol();
@@ -148,7 +149,8 @@ class UsuarioControllerTest {
 
         User springUser = new User("demo@mail.com", "hash",
                 List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
-        when(userDetailsService.loadUserByUsername("demo@mail.com")).thenReturn(springUser);
+        Authentication authResult = new UsernamePasswordAuthenticationToken(springUser, "plain", springUser.getAuthorities());
+        when(authenticationManager.authenticate(any())).thenReturn(authResult);
         when(usuarioRepository.findByEmail("demo@mail.com")).thenReturn(Optional.of(usuario));
         when(jwtUtil.generateToken(eq(1L), eq("demo@mail.com"), any())).thenReturn("jwt-token");
 
@@ -166,13 +168,27 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void loginLanzaCuandoUsuarioNoExiste() {
+    void loginLanzaCuandoCredencialesInvalidas() {
+        LoginRequest request = new LoginRequest();
+        request.setEmail("demo@mail.com");
+        request.setPassword("incorrecta");
+
+        when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("Bad credentials"));
+
+        assertThrows(BadCredentialsException.class, () -> controller.login(request, httpServletResponse));
+        verify(httpServletResponse, never()).addHeader(eq(HttpHeaders.SET_COOKIE), anyString());
+        verifyNoInteractions(usuarioRepository, jwtUtil);
+    }
+
+    @Test
+    void loginLanzaSiUsuarioNoExisteTrasAutenticar() {
         LoginRequest request = new LoginRequest();
         request.setEmail("missing@mail.com");
         request.setPassword("plain");
 
         User springUser = new User("missing@mail.com", "hash", List.of());
-        when(userDetailsService.loadUserByUsername("missing@mail.com")).thenReturn(springUser);
+        Authentication authResult = new UsernamePasswordAuthenticationToken(springUser, "plain", springUser.getAuthorities());
+        when(authenticationManager.authenticate(any())).thenReturn(authResult);
         when(usuarioRepository.findByEmail("missing@mail.com")).thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class, () -> controller.login(request, httpServletResponse));
