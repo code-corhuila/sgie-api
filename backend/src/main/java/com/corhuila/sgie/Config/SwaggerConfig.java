@@ -17,8 +17,8 @@ public class SwaggerConfig {
     public OpenAPI api() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("API REST Java con Spring Boot y DB PostgreSQL")
-                        .version("1.0-SNAPSHOT")
+                        .title("SGIE - Sistema de Gestion de Instalaciones y Equipos - API REST")
+                        .version("1.0")
                         .contact(new Contact().name("Juan Sebastian Zambrano").email("jszambranop@gmail.com"))
                 )
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))

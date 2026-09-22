@@ -3,7 +3,6 @@ package com.corhuila.sgie.Maintenance.Controller;
 import com.corhuila.sgie.Maintenance.Entity.CategoriaMantenimientoEquipo;
 import com.corhuila.sgie.Maintenance.Service.CategoriaMantenimientoEquipoService;
 import com.corhuila.sgie.common.BaseController;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 

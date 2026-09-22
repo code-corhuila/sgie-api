@@ -1173,7 +1173,6 @@ COPY public.entidad (id, fecha_creacion, usuario_creacion, fecha_eliminacion, us
 22	2025-11-03 14:53:00.127422	1	\N	\N	t	2025-11-03 14:53:00.127422	\N	RESERVA
 23	2025-11-03 14:53:00.127422	1	\N	\N	t	2025-11-03 14:53:00.127422	\N	DETALLE_RESERVA_EQUIPO
 24	2025-11-03 14:53:00.127422	1	\N	\N	t	2025-11-03 14:53:00.127422	\N	DETALLE_RESERVA_INSTALACION
-25	2025-11-03 14:53:00.127422	1	\N	\N	t	2025-11-03 14:53:00.127422	\N	TIPO_EQUIPO
 \.
 
 
@@ -1377,10 +1376,6 @@ COPY public.permiso_rol_entidad (id, fecha_creacion, usuario_creacion, fecha_eli
 94	2025-11-03 14:53:21.613853	1	\N	\N	t	2025-11-03 14:53:21.613853	\N	24	2	1
 95	2025-11-03 14:53:21.613853	1	\N	\N	t	2025-11-03 14:53:21.613853	\N	24	3	1
 96	2025-11-03 14:53:21.613853	1	\N	\N	t	2025-11-03 14:53:21.613853	\N	24	4	1
-97	2025-11-03 14:53:21.613853	1	\N	\N	t	2025-11-03 14:53:21.613853	\N	25	1	1
-98	2025-11-03 14:53:21.613853	1	\N	\N	t	2025-11-03 14:53:21.613853	\N	25	2	1
-99	2025-11-03 14:53:21.613853	1	\N	\N	t	2025-11-03 14:53:21.613853	\N	25	3	1
-100	2025-11-03 14:53:21.613853	1	\N	\N	t	2025-11-03 14:53:21.613853	\N	25	4	1
 \.
 
 
@@ -1451,7 +1446,7 @@ COPY public.tipo_reserva (id, fecha_creacion, usuario_creacion, fecha_eliminacio
 
 COPY public.usuario (id, fecha_creacion, usuario_creacion, fecha_eliminacion, usuario_eliminacion, state, fecha_modificacion, usuario_modificacion, email, password, id_persona) FROM stdin;
 1	2025-11-03 14:53:08.735968	1	\N	\N	t	2025-11-03 14:53:08.735968	\N	admin@system.com	$2b$12$CKG0.blMMABlrdrbo4wo4OfYEJELvQqtzxMzKS8KFT3PbYEFBg7hS	1
-2	2025-11-03 14:57:44.298349	1	\N	\N	t	2025-11-03 15:00:50.753776	1	camiloz@gmail.com	$2a$12$7lGPd5w7NmR6uz7cKrVlmOHEocJ1XmwAFshtwSPO06nXQeoMryzvS	2
+2	2025-11-03 14:57:44.298349	1	\N	\N	t	2025-11-03 15:00:50.753776	1	camiloz@gmail.com	$2b$12$CKG0.blMMABlrdrbo4wo4OfYEJELvQqtzxMzKS8KFT3PbYEFBg7hS	2
 \.
 
 

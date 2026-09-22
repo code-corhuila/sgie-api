@@ -2,7 +2,6 @@ package com.corhuila.sgie.Equipment.Service;
 
 import com.corhuila.sgie.Equipment.DTO.EquipoReporteDTO;
 import com.corhuila.sgie.Equipment.DTO.IEquipoInstalacionDTO;
-import com.corhuila.sgie.Equipment.Entity.Equipo;
 import com.corhuila.sgie.Equipment.IRepository.IEquipoRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

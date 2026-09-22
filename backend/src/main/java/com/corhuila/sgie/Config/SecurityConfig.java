@@ -76,7 +76,8 @@ public class SecurityConfig {
         requestHandler.setCsrfRequestAttributeName(null);
 
         return http
-                // ← CAMBIO: Deshabilitar CSRF para desarrollo
+                // CSRF con token en cookie (XSRF-TOKEN) y header X-XSRF-TOKEN.
+                // Se exceptuan OPTIONS, login y logout, que no disponen aun de sesion.
                 .csrf(csrf -> csrf
                 .csrfTokenRepository(csrfTokenRepository)
                 .csrfTokenRequestHandler(requestHandler)
@@ -92,12 +93,10 @@ public class SecurityConfig {
                         // rutas públicas
                         .requestMatchers(
                                 "/v1/api/usuario/login",
-                                "/v1/api/usuario/me",
                                 "/actuator/health",
                                 "/actuator/info",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/api/equipos/reportes/**",
                                 "/error"
                         ).permitAll()
                         // todas las demás requieren token
